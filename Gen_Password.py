@@ -15,9 +15,18 @@ low_let.remove('l'), cap_let.remove('I'), cap_let.remove('O')
 
 
 def get_password(n_cap, n_low, n_num, n_sym, can_repeat) -> str:
+    """
+    Функция генерации парлей уникальных значений или с повторами
+    :param n_cap: число заглавных букв
+    :param n_low: число строчных букв
+    :param n_num: число цифр
+    :param n_sym: число символов
+    :param can_repeat: флаг возможности повтора символов
+    :return: возвращает строку пароля
+    """
 
     if not can_repeat:
-        cap_let_list = list(random.sample(cap_let, n_cap))
+        cap_let_list = list(random.sample(cap_let, n_cap))  # делаем выборку уникальных элементов из списка
         low_let_list = list(random.sample(low_let, n_low))
         num_list = list(random.sample(num, n_num))
         symbol_list = list(random.sample(symbol, n_sym))
@@ -78,6 +87,8 @@ try:
     symbol_password = input(
         'Введите символы используемые в паролях (c - заглавные, l - строчные, n - цифры, s - символы): ')
     save_file = input('Сохранить данные в файл? y/n: ')
+
+
 
     if k_sym_pass == '':
         k_sym_pass = 8
