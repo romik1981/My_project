@@ -82,10 +82,10 @@ def write_file_password(password, type_f=None):
                         a[i] = get_password(2, 2, 3, 1, 8, 'lat n')
                 a.append('\n')
                 list_out.append(';'.join(a))
-        print(list_out)
         with open('password_out.csv', 'w+', encoding='utf-8') as fw:
             for _ in list_out:
                 fw.writelines(_)
+    return print('Пароли сгенерированны в файл password_out.csv')
 
 
 def param_password():
@@ -198,4 +198,5 @@ except ValueError:
           'или оставте по умолчанию(нажав Enter).')
 except TypeError:
     print('Число символов пароля превышает количество уникальных значений исходного списка!')
-input('Нажмите любую клавишу')
+print('\n')
+input('Для завершения нажмите Enter')
