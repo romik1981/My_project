@@ -82,10 +82,10 @@ def write_file_password(password, type_f=None):
                         a[i] = get_password(2, 2, 3, 1, 8, 'lat n')
                 a.append('\n')
                 list_out.append(';'.join(a))
-        with open('password_out.csv', 'w+', encoding='utf-8') as fw:
+        with open(f'password_out_{type_f}.csv', 'w+', encoding='utf-8') as fw:
             for _ in list_out:
                 fw.writelines(_)
-    return print('Пароли сгенерированны в файл password_out.csv')
+    return print(f'Пароли сгенерированны в файл password_out_{type_f}.csv')
 
 
 def param_password():
