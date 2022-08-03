@@ -71,6 +71,7 @@ def write_file_password(password, type_f=None):
     if type_f == None:
         with open('password.xml', 'a+', encoding='utf-8') as fa:
             fa.writelines(f'{password}\n')  # Записывает в файл сгенерированный пароль.
+        return print(f'Пароли сгенерированны в файл password.xml')
 
     if type_f == 'sed':
         list_out = []
