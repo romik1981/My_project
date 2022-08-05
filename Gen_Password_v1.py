@@ -65,13 +65,14 @@ def get_password(n_cap, n_low, n_num, n_sym, k_sym_pass, pass_lang) -> str:
         return password_str
 
 
-def write_file_password(password, type_f=None):
+def write_file_password(password_list, type_f=None):
     ''' Функция записи паролей в файл'''
 
     if type_f == None:
         with open('password.xml', 'a+', encoding='utf-8') as fa:
-            fa.writelines(f'{password}\n')  # Записывает в файл сгенерированный пароль.
-        return print(f'Пароли сгенерированны в файл password.xml')
+            for password in password_list:
+                fa.writelines(f'{password}\n')  # Записывает в файл сгенерированный пароль.
+        return print(f'\nПароли сгенерированны в файл password.xml')
 
     if type_f == 'sed':
         list_out = []
@@ -185,13 +186,15 @@ try:
 
     if param_password_in != 'sed':
         print('Ваши пароли:', end=' ')
+        password_list = []
         n = 0
         while n < int(quantity_pass):
             password = get_password(n_cap, n_low, n_num, n_sym, k_sym_pass, pass_lang)
+            password_list.append(password)
             print(password, end='   ')
             n += 1
-            if save_file == 'y':
-                write_file_password(password, type_f=None)
+        if save_file == 'y':
+            write_file_password(password_list)
 
 
 except ValueError:
