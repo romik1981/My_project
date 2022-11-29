@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Личный сайт студента GeekBrains</title>
+	<link rel="stylesheet" href="style(hw).css"> 
+	<script type="text/javascript">
+
+		var score = 0;
+
+		function checkAnswer(inputId, answers){
+			var userAnswer = document.getElementById(inputId).value;
+			userAnswer = userAnswer.toLowerCase();
+			for(var i = 0; i < answers.length; i++){
+				if(userAnswer == answers[i]){
+					score++;
+					break;
+				}
+			}
+		}
+		
+		function checkAnswers() {
+
+			checkAnswer("userAnswer1", ["замок", "засов", "дверь", "тёща", "сигнализация"]);
+			checkAnswer("userAnswer2", ["лук", "репчетый лук", "луковица", "лучок"]);
+			checkAnswer("userAnswer3", ["морковь", "рапунцель", "морковка"]);
+			checkAnswer("userAnswer4", ["огурец", "огурчик", "огуречик", "корнишон"]);
+
+			alert("Вы отгадали " + score + " загадок");
+
+		}
+
+	</script>
+</head>
+<body>
+
+<div class="content">
+	<div class="header">
+		<a href="index.html">Главная</a>
+		<a href="#">Загадки</a>
+		<a href="guess(hw).html">Угадайка</a>
+		<a href="genpass(hw).html">Генератор паролей</a>
+	</div>
+
+<div class="contentWrap">
+    <div class="content">
+        <div class="center">
+
+			<h1>Игра в загадки</h1>
+
+			<div class="box">
+
+				<p>Не лает не кусает и в дом не пускает?</p>
+				<input type="text" id="userAnswer1">
+
+				<p>Сидит дед во сто шуб одет, кто его раздевает тот слезы проливает?</p>
+				<input type="text" id="userAnswer2">
+
+				<p>Сидит девица в темнице, а коса на улице?</p>
+				<input type="text" id="userAnswer3">
+
+				<p>Без окон, без дверей полна горница людей?</p>
+				<input type="text" id="userAnswer4">
+
+				<br>
+				<a href="#" onClick="checkAnswers();">Ответить</a>
+
+			</div>
+
+        </div>
+    </div>
+</div>
+
+	
+
+</div>
+<div class="footer">
+	Copyright &copy; Roman Belyakov
+<div>
+
+
+</body>
+</html>
