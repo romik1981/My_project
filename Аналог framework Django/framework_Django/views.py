@@ -9,7 +9,7 @@ class Index:
 
 class About:
     def __call__(self):
-        return '200 OK', 'about'
+        return '200 OK', render('about.html')
 
 
 class Description:
@@ -27,3 +27,8 @@ class My_site:
 class Genpassword:
     def __call__(self):
         return '200 OK', render('site(hw)-html/genpass(hw).html')
+
+
+class Step_2:
+    def __call__(self):
+        return '200 OK', render('step_2/index.html')
