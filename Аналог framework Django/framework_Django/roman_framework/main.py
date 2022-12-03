@@ -2,7 +2,7 @@ import quopri
 from framework_requests import GetRequests, PostRequests
 
 class PageNotFound404:
-    def __call__(self):
+    def __call__(self, request):
         return '404 WHAT', '404 PAGE Not Found'
 
 
@@ -47,7 +47,7 @@ class Framework:
             view = PageNotFound404()
 
         # Запускаем контроллер
-        code, body = view()
+        code, body = view(request)
         start_response(code, [('Content-Type', 'text/html')])
         return [body.encode('utf-8')]
 
