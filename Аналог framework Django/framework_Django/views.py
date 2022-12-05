@@ -3,22 +3,26 @@ from datetime import date
 
 from roman_framework.templator import render
 from components.models import Engine
+from components.decorators import AppRoute
 
 site = Engine()
-
+routes = {}
 
 # Класс-контроллер - Главная страница
+@AppRoute(routes=routes, url='/')
 class Index:
     def __call__(self, request):
         return '200 OK', render('index.html', objects_list=site.categories)
 
 
 # Класс-контроллер - Страница "О проекте"
+@AppRoute(routes=routes, url='/about/')
 class About:
     def __call__(self, request):
         return '200 OK', render('about.html')
 
 # Класс-контроллер - Страница "Описание проекта"
+@AppRoute(routes=routes, url='/read_me/')
 class Description:
     def __call__(self, request):
         return '200 OK', 'In this project, I, Roman Belyakov, teach several courses on the basics of programming on ' \
@@ -27,24 +31,28 @@ class Description:
 
 
 # Класс-контроллер - Страница "Моя личная страница"
+@AppRoute(routes=routes, url= '/site/')
 class My_site:
     def __call__(self, request):
         return '200 OK', render('my_site.html')
 
 
 # Класс-контроллер - Страница "Генератор паролей"
+@AppRoute(routes=routes, url= '/genpass/')
 class Genpassword:
     def __call__(self, request):
         return '200 OK', render('genpassword.html')
 
 
 # Класс-контроллер - Страница "Страница проекта из шага 2"
+@AppRoute(routes=routes, url= '/step_2/')
 class Step_2:
     def __call__(self, request):
         return '200 OK', render('step_2.html')
 
 
 # Класс-контроллер - Страница "Расписания"
+@AppRoute(routes=routes, url='/study_programs/')
 class StudyPrograms:
     def __call__(self, request):
         return '200 OK', render('study-programs.html', data=date.today())
@@ -57,6 +65,7 @@ class NotFound404:
 
 
 # Класс-контроллер - Страница "Список курсов"
+@AppRoute(routes=routes, url='/courses-list/')
 class CoursesList:
     def __call__(self, request):
 
@@ -72,6 +81,7 @@ class CoursesList:
 
 
 # Класс-контроллер - Страница "Создать курс"
+@AppRoute(routes=routes, url='/create-course/')
 class CreateCourse:
     category_id = -1
 
@@ -109,6 +119,7 @@ class CreateCourse:
 
 
 # Класс-контроллер - Страница "Создать категорию"
+@AppRoute(routes=routes, url='/create-category/')
 class CreateCategory:
     def __call__(self, request):
 
@@ -140,6 +151,7 @@ class CreateCategory:
 
 
 # Класс-контроллер - Страница "Список категорий"
+@AppRoute(routes=routes, url='/category-list/')
 class CategoryList:
     def __call__(self, request):
         return '200 OK', render('category_list.html',
