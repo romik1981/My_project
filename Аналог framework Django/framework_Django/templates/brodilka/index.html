@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}
+	Обучение программированию
+{% endblock %}
+{% block style %}
+	{% include "brodilka/styles/styles.html" %}
+{% endblock %}
+{% block menu %}
+	{% include "inc-menu.html" %}
+{% endblock %}
+{% block body %}
+	<script src="scripts/player.js"></script>
+    <script src="scripts/config.js"></script>
+    <script src="scripts/mover.js"></script>
+    <script src="scripts/renderer.js"></script>
+    <script src="scripts/game.js"></script>
+{% endblock %}
