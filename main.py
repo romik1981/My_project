@@ -74,28 +74,35 @@ async def start(message: Message):
 # Команда /add
 @dp.message(Command("add"))
 async def add_song(message: Message):
-    await message.answer("Введите: Название; Текст; Аккорды; Ссылка")
+    await message.answer("Введите: Название; Текст; [Аккорды]; Ссылка")
 
-# Команда /find
+# Команда /find — теперь ищет по части названия
 @dp.message(Command("find"))
 async def find_song(message: Message):
     try:
         query = message.text.split(' ', 1)[1].strip().lower()
     except IndexError:
-        await message.answer("❌ Введите название после команды: `/find название`", parse_mode="Markdown")
+        await message.answer("❌ Введите название песни или часть его",
+                             parse_mode="Markdown")
         return
 
-    logger.info(f"Поиск: '{query}' среди {list(songs.keys())}")
+    logger.info(f"Команда /find: '{query}'")
 
-    song = songs.get(query)
-    if song:
-        response = (f"🎵 *{song['title']}*\n\n"
-                    f"📝 Текст:\n{song['lyrics']}\n\n"
-                    f"🎼 Аккорды: {song['chords']}\n\n"
-                    f"▶️ Видео: {song['video_url']}")
-        await message.answer(response, parse_mode="Markdown")
+    results = []
+    for key, song in songs.items():
+        if query in key or query in song["title"].lower():
+            results.append(song)
+
+    if results:
+        for song in results:
+            response = (f"🎵 *{song['title']}*\n\n"
+                        f"📝 Текст:\n{song['lyrics'][:300]}...\n\n"
+                        f"🎼 Аккорды: {song['chords']}\n\n"
+                        f"▶️ Видео: {song['video_url']}")
+            await message.answer(response, parse_mode="Markdown")
     else:
-        await message.answer("Песня не найдена.")
+        await message.answer("Песня не найдена. Хотите добавить? Используйте:"
+                             "\nНазвание; Текст; Аккорды; Ссылка")
 
 # Команда /list
 @dp.message(Command("list"))
@@ -106,16 +113,42 @@ async def list_songs(message: Message):
     titles = "\n".join([f"• {s['title']}" for s in songs.values()])
     await message.answer(f"Доступные песни:\n{titles}")
 
-# Обработка текста (добавление песни)
-@dp.message(F.text)
-async def process_song(message: Message):
-    text = message.text
-    if message.text.startswith("/") or ";" not in text:
+# Поиск по названию (без команды) — теперь по части названия
+@dp.message(F.text & ~F.text.startswith("/") & ~F.text.func(lambda text: ";" in text))
+async def search_song_by_name(message: Message):
+    query = message.text.strip().lower()
+    if not query:
         return
 
-    parts = text.split(";", 3)  # Разбиваем только на 4 части
+    logger.info(f"Поиск по части названия: '{query}'")
+
+    # Ищем все песни, где запрос встречается в названии
+    results = []
+    for key, song in songs.items():
+        if query in key or query in song["title"].lower():
+            results.append(song)
+
+    if results:
+        for song in results[:3]:  # Показываем максимум 3 результата
+            response = (f"🎵 *{song['title']}*\n\n"
+                        f"📝 Текст:\n{song['lyrics'][:300]}...\n\n"
+                        f"🎼 Аккорды: {song['chords']}\n\n"
+                        f"▶️ Видео: {song['video_url']}")
+            await message.answer(response, parse_mode="Markdown")
+    else:
+        await message.answer("Песня не найдена. Чтобы добавить — отправьте:"
+                             "\nНазвание; Текст; Аккорды; Ссылка")
+
+# Добавление песни
+@dp.message(F.text.func(lambda text: ";" in text))
+async def process_song(message: Message):
+    if message.text.startswith("/"):
+        return
+
+    parts = message.text.split(";", 3)
     if len(parts) != 4:
-        await message.answer("❌ Ошибка: нужно 4 части, разделённые точкой с запятой.")
+        await message.answer("❌ Ошибка: нужно 4 части, разделённые точкой с запятой."
+                             "\nФормат: Название; Текст; Аккорды; Ссылка")
         return
 
     title, lyrics, chords, video_url = [part.strip() for part in parts]
@@ -129,7 +162,7 @@ async def process_song(message: Message):
     }
     save_data(songs)
     logger.info(f"Добавлена: '{key}' -> {title}")
-    await message.answer(f"✅ Песня '{title}' добавлена!")
+    await message.answer(f"✅ Песня '{title}' успешно добавлена!")
 
 # Запуск
 async def main():
