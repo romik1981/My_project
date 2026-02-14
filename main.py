@@ -4,9 +4,8 @@ import logging
 import os
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 import asyncio
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -66,15 +65,17 @@ keyboard = ReplyKeyboardMarkup(
 async def start(message: Message):
     await message.answer("Привет! Я бот для хранения песен.\n"
                          "Команды:\n"
-                         "/add — добавить песню\n"
-                         "/find название — найти песню\n"
-                         "/list — список всех песен",
+                         "/add — добавить\n"
+                         "/find — найти\n"
+                         "/list — список\n"
+                         "/delete — удалить\n"
+                         "/edit — редактировать",
                          reply_markup=keyboard)
 
 # Команда /add
 @dp.message(Command("add"))
 async def add_song(message: Message):
-    await message.answer("Введите: Название; Текст; [Аккорды]; Ссылка")
+    await message.answer("Введите: Название; Текст; Аккорды; Ссылка")
 
 # Команда /find — теперь ищет по части названия
 @dp.message(Command("find"))
@@ -82,8 +83,7 @@ async def find_song(message: Message):
     try:
         query = message.text.split(' ', 1)[1].strip().lower()
     except IndexError:
-        await message.answer("❌ Введите название песни или часть его",
-                             parse_mode="Markdown")
+        await message.answer("❌ Введите название песни или часть его")
         return
 
     logger.info(f"Команда /find: '{query}'")
@@ -101,8 +101,7 @@ async def find_song(message: Message):
                         f"▶️ Видео: {song['video_url']}")
             await message.answer(response, parse_mode="Markdown")
     else:
-        await message.answer("Песня не найдена. Хотите добавить? Используйте:"
-                             "\nНазвание; Текст; Аккорды; Ссылка")
+        await message.answer("Песня не найдена.")
 
 # Команда /list
 @dp.message(Command("list"))
@@ -122,14 +121,13 @@ async def search_song_by_name(message: Message):
 
     logger.info(f"Поиск по части названия: '{query}'")
 
-    # Ищем все песни, где запрос встречается в названии
     results = []
     for key, song in songs.items():
         if query in key or query in song["title"].lower():
             results.append(song)
 
     if results:
-        for song in results[:3]:  # Показываем максимум 3 результата
+        for song in results[:3]:
             response = (f"🎵 *{song['title']}*\n\n"
                         f"📝 Текст:\n{song['lyrics'][:300]}...\n\n"
                         f"🎼 Аккорды: {song['chords']}\n\n"
@@ -163,6 +161,85 @@ async def process_song(message: Message):
     save_data(songs)
     logger.info(f"Добавлена: '{key}' -> {title}")
     await message.answer(f"✅ Песня '{title}' успешно добавлена!")
+
+# Команда /delete — удаление песни
+@dp.message(Command("delete"))
+async def delete_song(message: Message):
+    try:
+        query = message.text.split(' ', 1)[1].strip().lower()
+    except IndexError:
+        await message.answer("❌ Введите название песни после команды /delete")
+        return
+
+    # Ищем подходящие песни
+    matches = []
+    keys_to_delete = []
+    for key, song in songs.items():
+        if query in key or query in song["title"].lower():
+            matches.append(song)
+            keys_to_delete.append(key)
+
+    if not matches:
+        await message.answer("Песня не найдена.")
+        return
+
+    if len(matches) == 1:
+        title = matches[0]["title"]
+        del songs[keys_to_delete[0]]
+        save_data(songs)
+        await message.answer(f"🗑️ Песня '{title}' удалена.")
+    else:
+        # Если несколько — показываем список
+        list_text = "\n".join([f"• {s['title']}" for s in matches])
+        confirm = "\n".join([f"/confirm_delete {key}" for key in keys_to_delete])
+        await message.answer(f"Найдено несколько песен:\n{list_text}\n\n"
+                             f"Чтобы подтвердить удаление, введите:\n{confirm}")
+
+# Команда /confirm_delete — подтверждение удаления (внутренняя)
+@dp.message(Command("confirm_delete"))
+async def confirm_delete(message: Message):
+    try:
+        key = message.text.split(' ', 1)[1].strip().lower()
+    except IndexError:
+        return
+
+    if key in songs:
+        title = songs[key]["title"]
+        del songs[key]
+        save_data(songs)
+        await message.answer(f"🗑️ Песня '{title}' удалена.")
+    else:
+        await message.answer("Песня уже удалена или не существует.")
+
+# Команда /edit — редактирование песни
+@dp.message(Command("edit"))
+async def edit_song(message: Message):
+    try:
+        args = message.text.split(' ', 1)[1].strip()
+        # Формат: /edit Название; Новый текст; Новые аккорды; Новая ссылка
+        edit_parts = args.split(';', 3)
+        if len(edit_parts) != 4:
+            raise ValueError()
+        title = edit_parts[0].strip()
+        new_lyrics = edit_parts[1].strip()
+        new_chords = edit_parts[2].strip()
+        new_video_url = edit_parts[3].strip()
+    except:
+        await message.answer("❌ Формат: `/edit Название; Новый текст; Новые аккорды; Новая ссылка`", parse_mode="Markdown")
+        return
+
+    key = title.lower()
+    if key not in songs:
+        await message.answer("Песня не найдена. Проверьте название.")
+        return
+
+    # Обновляем
+    songs[key]["lyrics"] = new_lyrics
+    songs[key]["chords"] = new_chords
+    songs[key]["video_url"] = new_video_url
+    save_data(songs)
+
+    await message.answer(f"✅ Песня '{title}' обновлена!")
 
 # Запуск
 async def main():
